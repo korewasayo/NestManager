@@ -17,21 +17,27 @@ class PaymentResource extends Resource
 {
     protected static ?string $model = Payment::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
+    
+    protected static ?string $navigationGroup = 'Financials';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('booking_id')
+                Forms\Components\Select::make('booking_id')
+                    ->relationship('booking', 'id')
                     ->required()
-                    ->numeric(),
+                    ->searchable(),
                 Forms\Components\TextInput::make('amount')
                     ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('method')
+                    ->numeric()
+                    ->prefix('€'),
+                Forms\Components\Select::make('method')
+                    ->options(\App\Enums\PaymentMethod::class)
                     ->required(),
-                Forms\Components\TextInput::make('status')
+                Forms\Components\Select::make('status')
+                    ->options(\App\Enums\PaymentStatus::class)
                     ->required(),
                 Forms\Components\DatePicker::make('payment_date')
                     ->required(),
@@ -44,15 +50,17 @@ class PaymentResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('booking_id')
+                Tables\Columns\TextColumn::make('booking.id')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
-                    ->numeric()
+                    ->money('EUR')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('method')
+                    ->badge()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('status')
+                    ->badge()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('payment_date')
                     ->date()
