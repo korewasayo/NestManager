@@ -17,15 +17,19 @@ class SeasonResource extends Resource
 {
     protected static ?string $model = Season::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-calendar';
+    
+    protected static ?string $navigationGroup = 'Settings';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('property_id')
-                    ->required()
-                    ->numeric(),
+                Forms\Components\Select::make('property_id')
+                    ->relationship('property', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
                 Forms\Components\TextInput::make('name')
                     ->required(),
                 Forms\Components\DatePicker::make('start_date')
@@ -34,7 +38,8 @@ class SeasonResource extends Resource
                     ->required(),
                 Forms\Components\TextInput::make('price_per_night')
                     ->required()
-                    ->numeric(),
+                    ->numeric()
+                    ->prefix('€'),
                 Forms\Components\TextInput::make('min_nights')
                     ->required()
                     ->numeric()
@@ -46,8 +51,8 @@ class SeasonResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('property_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('property.name')
+                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
@@ -58,7 +63,7 @@ class SeasonResource extends Resource
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('price_per_night')
-                    ->numeric()
+                    ->money('EUR')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('min_nights')
                     ->numeric()
