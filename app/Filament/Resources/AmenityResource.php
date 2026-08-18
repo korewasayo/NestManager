@@ -17,16 +17,21 @@ class AmenityResource extends Resource
 {
     protected static ?string $model = Amenity::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-sparkles';
+    
+    protected static ?string $navigationGroup = 'Settings';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->required(),
-                Forms\Components\TextInput::make('icon'),
-                Forms\Components\TextInput::make('category')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('icon')
+                    ->maxLength(255),
+                Forms\Components\Select::make('category')
+                    ->options(\App\Enums\AmenityCategory::class)
                     ->required(),
             ]);
     }
@@ -36,10 +41,13 @@ class AmenityResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('icon')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('category')
+                    ->badge()
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -51,7 +59,8 @@ class AmenityResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('category')
+                    ->options(\App\Enums\AmenityCategory::class),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
