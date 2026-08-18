@@ -12,59 +12,103 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\CheckboxList;
 
 class PropertyResource extends Resource
 {
     protected static ?string $model = Property::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-home-modern';
+    
+    protected static ?string $navigationGroup = 'Properties';
+
+    public static function getRecordTitleAttribute(): ?string
+    {
+        return 'name';
+    }
+
+    public static function hasCombinedRelationManagerTabsWithContent(): bool
+    {
+        return true;
+    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required(),
-                Forms\Components\TextInput::make('slug')
-                    ->required(),
-                Forms\Components\Textarea::make('description')
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('address')
-                    ->required(),
-                Forms\Components\TextInput::make('city')
-                    ->required(),
-                Forms\Components\TextInput::make('postal_code')
-                    ->required(),
-                Forms\Components\TextInput::make('country')
-                    ->required(),
-                Forms\Components\TextInput::make('latitude')
-                    ->numeric(),
-                Forms\Components\TextInput::make('longitude')
-                    ->numeric(),
-                Forms\Components\TextInput::make('type')
-                    ->required(),
-                Forms\Components\TextInput::make('max_guests')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('bedrooms')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('bathrooms')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('base_price_per_night')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('cleaning_fee')
-                    ->required()
-                    ->numeric()
-                    ->default(0),
-                Forms\Components\TextInput::make('check_in_time'),
-                Forms\Components\TextInput::make('check_out_time'),
-                Forms\Components\Textarea::make('house_rules')
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('status')
-                    ->required(),
+                Tabs::make('Property Tabs')
+                    ->tabs([
+                        Tabs\Tab::make('Info')
+                            ->schema([
+                                Forms\Components\TextInput::make('name')
+                                    ->required(),
+                                Forms\Components\TextInput::make('slug')
+                                    ->required(),
+                                Forms\Components\Textarea::make('description')
+                                    ->columnSpanFull(),
+                                Forms\Components\TextInput::make('address')
+                                    ->required(),
+                                Forms\Components\TextInput::make('city')
+                                    ->required(),
+                                Forms\Components\TextInput::make('postal_code')
+                                    ->required(),
+                                Forms\Components\TextInput::make('country')
+                                    ->required(),
+                                Forms\Components\TextInput::make('latitude')
+                                    ->numeric(),
+                                Forms\Components\TextInput::make('longitude')
+                                    ->numeric(),
+                                Forms\Components\Select::make('type')
+                                    ->options(\App\Enums\PropertyType::class)
+                                    ->required(),
+                                Forms\Components\TextInput::make('max_guests')
+                                    ->required()
+                                    ->numeric(),
+                                Forms\Components\TextInput::make('bedrooms')
+                                    ->required()
+                                    ->numeric(),
+                                Forms\Components\TextInput::make('bathrooms')
+                                    ->required()
+                                    ->numeric(),
+                                Forms\Components\TextInput::make('base_price_per_night')
+                                    ->required()
+                                    ->numeric()
+                                    ->prefix('€'),
+                                Forms\Components\TextInput::make('cleaning_fee')
+                                    ->required()
+                                    ->numeric()
+                                    ->default(0)
+                                    ->prefix('€'),
+                                Forms\Components\TimePicker::make('check_in_time'),
+                                Forms\Components\TimePicker::make('check_out_time'),
+                                Forms\Components\Textarea::make('house_rules')
+                                    ->columnSpanFull(),
+                                Forms\Components\Select::make('status')
+                                    ->options(\App\Enums\PropertyStatus::class)
+                                    ->default('active')
+                                    ->required(),
+                            ])->columns(2),
+                            
+                        Tabs\Tab::make('Fotos')
+                            ->schema([
+                                SpatieMediaLibraryFileUpload::make('fotos')
+                                    ->collection('property_photos')
+                                    ->multiple()
+                                    ->responsiveImages()
+                                    ->image()
+                                    ->columnSpanFull(),
+                            ]),
+                            
+                        Tabs\Tab::make('Comodidades')
+                            ->schema([
+                                CheckboxList::make('amenities')
+                                    ->relationship('amenities', 'name')
+                                    ->columns(3)
+                                    ->columnSpanFull(),
+                            ]),
+                    ])->columnSpanFull(),
             ]);
     }
 
@@ -136,7 +180,8 @@ class PropertyResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\RoomsRelationManager::class,
+            RelationManagers\SeasonsRelationManager::class,
         ];
     }
 

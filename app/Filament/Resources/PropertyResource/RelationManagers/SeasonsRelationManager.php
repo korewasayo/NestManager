@@ -10,9 +10,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class RoomsRelationManager extends RelationManager
+class SeasonsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'rooms';
+    protected static string $relationship = 'seasons';
 
     public function form(Form $form): Form
     {
@@ -21,26 +21,18 @@ class RoomsRelationManager extends RelationManager
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Select::make('type')
-                    ->options(\App\Enums\RoomType::class)
+                Forms\Components\DatePicker::make('start_date')
                     ->required(),
-                Forms\Components\Textarea::make('description')
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('base_price_per_night')
+                Forms\Components\DatePicker::make('end_date')
+                    ->required(),
+                Forms\Components\TextInput::make('price_per_night')
+                    ->required()
                     ->numeric()
                     ->prefix('€'),
-                Forms\Components\TextInput::make('max_guests')
+                Forms\Components\TextInput::make('min_nights')
+                    ->required()
                     ->numeric()
-                    ->required(),
-                Forms\Components\TextInput::make('bedrooms')
-                    ->numeric()
-                    ->required(),
-                Forms\Components\TextInput::make('beds')
-                    ->numeric()
-                    ->required(),
-                Forms\Components\TextInput::make('bathrooms')
-                    ->numeric()
-                    ->required(),
+                    ->default(1),
             ]);
     }
 
@@ -51,15 +43,18 @@ class RoomsRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('type')
-                    ->badge(),
-                Tables\Columns\TextColumn::make('base_price_per_night')
+                Tables\Columns\TextColumn::make('start_date')
+                    ->date()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('end_date')
+                    ->date()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('price_per_night')
                     ->money('EUR')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('max_guests')
-                    ->numeric(),
-                Tables\Columns\TextColumn::make('beds')
-                    ->numeric(),
+                Tables\Columns\TextColumn::make('min_nights')
+                    ->numeric()
+                    ->sortable(),
             ])
             ->filters([
                 //
