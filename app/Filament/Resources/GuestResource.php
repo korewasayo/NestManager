@@ -17,7 +17,9 @@ class GuestResource extends Resource
 {
     protected static ?string $model = Guest::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
+    
+    protected static ?string $navigationGroup = 'Guests & Bookings';
 
     public static function form(Form $form): Form
     {
@@ -44,7 +46,8 @@ class GuestResource extends Resource
                 Forms\Components\TextInput::make('postal_code'),
                 Forms\Components\Textarea::make('notes')
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('source'),
+                Forms\Components\Select::make('source')
+                    ->options(\App\Enums\GuestSource::class),
             ]);
     }
 
@@ -61,23 +64,31 @@ class GuestResource extends Resource
                 Tables\Columns\TextColumn::make('phone')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('phone_secondary')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('date_of_birth')
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('nationality')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('id_document_type')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('id_document_number')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('city')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('country')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('postal_code')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('source')
+                    ->badge()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -89,7 +100,11 @@ class GuestResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('source')
+                    ->options(\App\Enums\GuestSource::class),
+                Tables\Filters\SelectFilter::make('country')
+                    ->options(fn () => Guest::query()->distinct()->pluck('country', 'country')->filter()->toArray())
+                    ->searchable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
